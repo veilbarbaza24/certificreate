@@ -70,6 +70,7 @@ function TemplateCard({
 export function CertificateWorkspace() {
   const [draft, setDraft] = useState<CertificateDraft>(INITIAL_DRAFT);
   const [isRendering, setIsRendering] = useState(false);
+  const [isRenderingPdf, setIsRenderingPdf] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   const updateField = (field: keyof CertificateDraft, value: string) =>
@@ -109,6 +110,43 @@ export function CertificateWorkspace() {
       setErrorMessage(message);
     } finally {
       setIsRendering(false);
+    }
+  };
+
+  const handleDownloadPdf = async () => {
+    setIsRenderingPdf(true);
+    setErrorMessage("");
+
+    try {
+      const response = await fetch("/api/export/pdf", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(draft),
+      });
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(payload?.error ?? "PDF rendering failed.");
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      const safeRecipient = sanitizeFilename(draft.recipientName);
+
+      link.href = url;
+      link.download = `certificate-${safeRecipient}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Something went wrong while rendering the PDF.";
+      setErrorMessage(message);
+    } finally {
+      setIsRenderingPdf(false);
     }
   };
 
@@ -216,9 +254,11 @@ export function CertificateWorkspace() {
                 </button>
                 <button
                   type="button"
-                  className="inline-flex items-center justify-center gap-2 rounded-[10px] border border-transparent bg-linear-to-b from-accent-strong to-accent px-3.5 py-2.5 text-[13px] font-semibold text-accent-ink shadow-[0_10px_30px_rgba(43,110,242,0.25)]"
+                  onClick={handleDownloadPdf}
+                  disabled={isRenderingPdf}
+                  className="inline-flex items-center justify-center gap-2 rounded-[10px] border border-transparent bg-linear-to-b from-accent-strong to-accent px-3.5 py-2.5 text-[13px] font-semibold text-accent-ink shadow-[0_10px_30px_rgba(43,110,242,0.25)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  Download PDF
+                  {isRenderingPdf ? "Rendering..." : "Download PDF"}
                 </button>
               </div>
             </div>
