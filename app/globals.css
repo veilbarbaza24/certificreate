@@ -1,0 +1,117 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0a0c10;
+  --foreground: #e6edf6;
+
+  --surface: #121723;
+  --surface-2: #1a2234;
+  --panel: #0f1421;
+  --border: #22304a;
+  --border-strong: #2f4368;
+
+  --muted: #95a3bd;
+  --faint: #5b6a8a;
+
+  --accent: #2b6ef2;
+  --accent-strong: #3f7efb;
+  --accent-soft: rgba(43, 110, 242, 0.14);
+  --accent-ink: #ffffff;
+
+  --success: #2fbb7a;
+  --warn: #f3b63e;
+  --danger: #ef5a5a;
+
+  --cert-bg: #ffffff;
+  --cert-ink: #162033;
+  --cert-muted: #4b5872;
+  --cert-border: #1f4eae;
+  --cert-border-outer: #123274;
+  --cert-accent: #1f4eae;
+  --cert-rule: rgba(31, 78, 174, 0.45);
+  --cert-corner: #1f4eae;
+
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-playfair-display);
+  --font-cert-body: var(--font-cormorant-garamond);
+  --font-mono: var(--font-geist-mono);
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+
+  --shadow-sm: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 10px 30px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 30px 80px rgba(0, 0, 0, 0.55);
+
+  --app-max: 1500px;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-panel: var(--panel);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-ink: var(--accent-ink);
+
+  --color-success: var(--success);
+  --color-warn: var(--warn);
+  --color-danger: var(--danger);
+
+  --color-cert-bg: var(--cert-bg);
+  --color-cert-ink: var(--cert-ink);
+  --color-cert-muted: var(--cert-muted);
+  --color-cert-border: var(--cert-border);
+  --color-cert-border-outer: var(--cert-border-outer);
+  --color-cert-accent: var(--cert-accent);
+  --color-cert-rule: var(--cert-rule);
+  --color-cert-corner: var(--cert-corner);
+
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
+  --font-cert-body: var(--font-cert-body);
+  --font-mono: var(--font-mono);
+
+  --radius-xs: var(--radius-xs);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+
+  --shadow-sm: var(--shadow-sm);
+  --shadow-lg: var(--shadow-lg);
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background:
+    radial-gradient(1200px 600px at 20% -10%, rgba(43, 110, 242, 0.12), transparent 60%),
+    var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100%;
+}
