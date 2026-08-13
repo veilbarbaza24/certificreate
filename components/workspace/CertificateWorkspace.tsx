@@ -6,6 +6,15 @@ import type { CertificateDraft } from "@/types/certificate";
 import { templates } from "@/lib/templates";
 import { BlackBorderCertificate } from "@/components/certificates/BlackBorderCertificate";
 
+function sanitizeFilename(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 40) || "certificate";
+}
+
 // First-run values so the preview renders full on load. instructorName
 // becomes the brand-settings default in feature 6a.
 const INITIAL_DRAFT: CertificateDraft = {
@@ -60,9 +69,48 @@ function TemplateCard({
 
 export function CertificateWorkspace() {
   const [draft, setDraft] = useState<CertificateDraft>(INITIAL_DRAFT);
+  const [isRendering, setIsRendering] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const updateField = (field: keyof CertificateDraft, value: string) =>
     setDraft((prev) => ({ ...prev, [field]: value }));
+
+  const handleDownloadPng = async () => {
+    setIsRendering(true);
+    setErrorMessage("");
+
+    try {
+      const response = await fetch("/api/export/png", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(draft),
+      });
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(payload?.error ?? "PNG rendering failed.");
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      const safeRecipient = sanitizeFilename(draft.recipientName);
+
+      link.href = url;
+      link.download = `certificate-${safeRecipient}.png`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Something went wrong while rendering the PNG.";
+      setErrorMessage(message);
+    } finally {
+      setIsRendering(false);
+    }
+  };
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -160,9 +208,11 @@ export function CertificateWorkspace() {
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  className="inline-flex items-center justify-center gap-2 rounded-[10px] border border-border bg-surface px-3.5 py-2.5 text-[13px] font-semibold text-foreground"
+                  onClick={handleDownloadPng}
+                  disabled={isRendering}
+                  className="inline-flex items-center justify-center gap-2 rounded-[10px] border border-border bg-surface px-3.5 py-2.5 text-[13px] font-semibold text-foreground disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  Download PNG
+                  {isRendering ? "Rendering..." : "Download PNG"}
                 </button>
                 <button
                   type="button"
@@ -172,6 +222,12 @@ export function CertificateWorkspace() {
                 </button>
               </div>
             </div>
+
+            {errorMessage ? (
+              <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                {errorMessage}
+              </div>
+            ) : null}
 
             <div className="grid place-items-center rounded-md border border-border bg-[radial-gradient(900px_500px_at_50%_20%,var(--accent-soft),transparent_60%),var(--panel)] p-10 shadow-[var(--shadow-lg)_inset]">
               <div className="w-full max-w-[960px]">
